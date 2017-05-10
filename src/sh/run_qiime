@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -eu
+
+
+QIIME_CONFIG_FP="$(readlink -f data/qiime_config)"
+rm ~/.qiime_config
+cp "${QIIME_CONFIG_FP}" ~/.qiime_config
+
+validate_mapping_file.py \
+    -m previous_data/test_mapping.tab \
+    -o output/qiime/validate_mapping \
+    --disable_primer_check
+
+# on original files
+split_libraries.py \
+    -m output/qiime/validate_mapping/test_mapping.tab_corrected.txt \
+    -f previous_data/seq45R1.fasta \
+    --dir_prefix output/qiime/split_libraries \
+    --disable_primers \
+    --min_seq_length 50
+
+# manually mung old file
+test/biopython_test_rename.py
+
+
+pick_open_reference_otus.py \
+    --parallel \
+    --jobs_to_start 10 \
+    -i output/qiime/split_libraries/seqs.fna \
+    -r output/fa/rbcl_58024.fa \
+    -o output/qiime/open_references \
+    --suppress_align_and_tree \
+    --suppress_taxonomy_assignment
+
+biom summarize-table \
+    -i output/qiime/open_references/otu_table_mc2.biom \
+    -o output/qiime/open_references/otu_table_mc2.summary.txt
+
+assign_taxonomy.py \
+    -i test/rep_set/seq45R1_rep_set.fasta \
+    --id_to_taxonomy_fp output/taxonomy/taxonomy.txt \
+    --reference_seqs_fp output/fa/rbcl_58024.fa \
+    --assignment_method uclust
+
+core_diversity_analyses.py \
+    -i test/otu_table.biom \
+    -o test_diversity \
+
