@@ -6,8 +6,8 @@ if [[ -e "${tempdir}" ]]; then
 fi
 
 cat <<- _EOF_ > data/qiime_config
-    assign_taxonomy_reference_seqs_fp $(readlink -f output/fa/rbcl_58024.fa)
-    pick_otus_reference_seqs_fp $(readlink -f output/fa/rbcl_58024.fa)
-    assign_taxonomy_id_to_taxonomy_fp  $(readlink -f output/taxonomy/taxonomy.txt)
-    temp_dir $(readlink -f "${tempdir}")
+assign_taxonomy_reference_seqs_fp $(readlink -f output/fa/rbcl_58024.fa)
+pick_otus_reference_seqs_fp $(readlink -f output/fa/rbcl_58024.fa)
+assign_taxonomy_id_to_taxonomy_fp  $(readlink -f output/taxonomy/taxonomy.txt)
+temp_dir $(readlink -f "${tempdir}")
 _EOF_
