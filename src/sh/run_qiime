@@ -2,7 +2,6 @@
 
 set -eu
 
-
 QIIME_CONFIG_FP="$(readlink -f data/qiime_config)"
 rm ~/.qiime_config
 cp "${QIIME_CONFIG_FP}" ~/.qiime_config
