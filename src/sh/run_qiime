@@ -28,9 +28,7 @@ pick_open_reference_otus.py \
     --jobs_to_start 10 \
     -i output/qiime/split_libraries/seqs.fna \
     -r output/fa/rbcl_58024.fa \
-    -o output/qiime/open_references \
-    --suppress_align_and_tree \
-    --suppress_taxonomy_assignment
+    -o output/qiime/open_references
 
 biom summarize-table \
     -i output/qiime/open_references/otu_table_mc2.biom \

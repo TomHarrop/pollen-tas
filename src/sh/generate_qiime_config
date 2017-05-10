@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-tempdir=output/
+tempdir=output/qiime/tmp
 if [[ -e "${tempdir}" ]]; then
     mkdir -p "${tempdir}"
 fi
