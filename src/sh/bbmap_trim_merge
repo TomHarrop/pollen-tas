@@ -47,7 +47,7 @@ pair_trim_merge () {
 
     # run bbmerge
     _bbmerge_err="${_outdir}/${_bn}.log"
-    echo "${_cmd1[@]}" 2> "${_bbmerge_err}"
+    "${_cmd1[@]}" 2> "${_bbmerge_err}"
 }
 
 export -f pair_trim_merge
