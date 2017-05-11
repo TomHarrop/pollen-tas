@@ -22,7 +22,6 @@ split_libraries.py \
 # manually mung old file
 test/biopython_test_rename.py
 
-
 pick_open_reference_otus.py \
     --parallel \
     --jobs_to_start 10 \
@@ -34,13 +33,16 @@ biom summarize-table \
     -i output/qiime/open_references/otu_table_mc2.biom \
     -o output/qiime/open_references/otu_table_mc2.summary.txt
 
-assign_taxonomy.py \
-    -i test/rep_set/seq45R1_rep_set.fasta \
-    --id_to_taxonomy_fp output/taxonomy/taxonomy.txt \
-    --reference_seqs_fp output/fa/rbcl_58024.fa \
-    --assignment_method uclust
+summarize_taxa_through_plots.py \
+    -i output/qiime/open_references/otu_table_mc2.biom \
+    -m output/qiime/validate_mapping/test_mapping.tab_corrected.txt \
+    -o output/qiime/summarize_taxa 
 
 core_diversity_analyses.py \
-    -i test/otu_table.biom \
-    -o test_diversity \
+    -i output/qiime/open_references/otu_table_mc2.biom \
+    -o output/qiime/test_diversity \
+    -m output/qiime/validate_mapping/test_mapping.tab_corrected.txt \
+    -e 1 \
+    --nonphylogenetic_diversity
+
 

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# function for trimming and merging
+pair_trim_merge () {
+    local _outdir
+    local _r1_file
+    local _r2_file
+    local _cmd1
+    local _bn
+    local _bbmerge_err
+    
+    _r1_file="${1}"
+    _outdir="${2}"
+
+    _r2_file="${_r1_file/_R1_/_R2_}"
+
+    printf "_r1_file:\t%s\n" "${_r1_file}"
+    printf "_r2_file:\t%s\n" "${_r2_file}"
+
+    # make sure R2 exists
+    if [[ ! -e "${_r2_file}" ]]; then
+        printf "%s not found; exit\n" "${_r2_file}"
+        exit 1
+    fi
+
+    # output basename
+    _bn=$(basename "${_r1_file%%_R1_*}")
+    printf "basename:\t%s\n" "${_bn}"
+
+    # bbmerge
+    _cmd1=( bin/bbmap/bbmerge.sh 
+               "in1=${_r1_file}"
+               "in2=${_r2_file}"
+               "out=${_outdir}/${_bn}_merged.fastq.gz"
+               "outu=${_outdir}/${_bn}_unmerged_R1.fastq.gz"
+               "outu2=${_outdir}/${_bn}_unmerged_R2.fastq.gz"
+               ziplevel=9
+               adapter="data/rbcl_primers.fa" )
+
+    shopt -s extglob
+    printf "merge command line: "
+    printf "%s " "${_cmd1[@]//+([[:blank:]])/ }"
+    printf "\n"
+    shopt -u extglob
+
+    # run bbmerge
+    _bbmerge_err="${_outdir}/${_bn}.log"
+    echo "${_cmd1[@]}" 2> "${_bbmerge_err}"
+}
+
+export -f pair_trim_merge
+
+# setup outdir
+outdir="output/trim_merge"
+if [[ ! -e "${outdir}" ]]; then
+    mkdir -p "${outdir}"
+fi
+
+find "data/NZGL02556/" -name "*_R1_*.fastq.gz" \
+    -exec bash -c 'pair_trim_merge "${0}" "${1}"' {} "${outdir}" \;
