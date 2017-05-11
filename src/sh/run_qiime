@@ -7,7 +7,7 @@ rm ~/.qiime_config
 cp "${QIIME_CONFIG_FP}" ~/.qiime_config
 
 validate_mapping_file.py \
-    -m previous_data/test_mapping.tab \
+    -m output/qiime/split_libraries/mapping.txt \
     -o output/qiime/validate_mapping \
     --disable_primer_check
 

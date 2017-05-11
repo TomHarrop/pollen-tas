@@ -7,6 +7,17 @@ import os
 import re
 import csv
 
+
+# barcode sanitising wrapper
+def sanitise_barcode(x):
+    return(re.sub('\+', '', x))
+
+
+# name sanitising wrapper
+def sanitise_name(x):
+    return(re.sub('[^\w]|_', '.', x))
+
+
 # output:
 outdir = "output/qiime/split_libraries"
 
@@ -20,6 +31,16 @@ with open('data/project_files/expected_barcodes.csv', 'r') as f:
         sample_names[row[0]] = row[1]
         expected_barcodes[row[0]] = row[2]
 
+# remove plus symbol
+sanitised_barcodes = {}
+for x in expected_barcodes:
+    sanitised_barcodes[x] = sanitise_barcode(expected_barcodes[x])
+
+# remove disallowed characters from names
+sanitised_names = {}
+for x in sample_names:
+    sanitised_names[x] = sanitise_name(sample_names[x])
+
 # read primers
 linker_primers = {}
 with open('data/project_files/linker_primers.csv', 'r') as f:
@@ -30,7 +51,7 @@ with open('data/project_files/linker_primers.csv', 'r') as f:
 # write sample mapping file
 with open(os.path.join(outdir, "mapping.txt"), 'w') as f:
     f.write('#SampleID\tBarcodeSequence\tLinkerPrimerSequence\tDescription\n')
-    lines = ['\t'.join([sample_names[x], expected_barcodes[x],
+    lines = ['\t'.join([sanitised_names[x], sanitised_barcodes[x],
                         linker_primers[x], sample_names[x]])
              for x in sample_names]
     f.writelines('%s\n' % line for line in lines)
@@ -55,8 +76,8 @@ with open(os.path.join(outdir, 'seqs.fna'), 'w') as outfile:
         # get the sample name
         bn = os.path.basename(fq)
         nzgl_name = re.sub(basename_regex, r'\g<SN>', bn)
-        orig_bc = expected_barcodes[nzgl_name]
-        sample_name = sample_names[nzgl_name]
+        orig_bc = sanitised_barcodes[nzgl_name]
+        sample_name = sanitised_names[nzgl_name]
         # unzip and read fq
         with gzip.open(fq, 'rt') as handle:
             fastq = SeqIO.parse(handle, 'fastq-sanger')
@@ -67,7 +88,7 @@ with open(os.path.join(outdir, 'seqs.fna'), 'w') as outfile:
                 i+=1
                 # get the barcode
                 desc = record.description
-                new_bc = re.sub(desc_regex, r'\g<BC>', desc)
+                new_bc = sanitise_barcode(re.sub(desc_regex, r'\g<BC>', desc))
                 # number of differences between read_bc and exp_bc
                 bc_diff = sum(c1 != c2
                               for c1, c2
