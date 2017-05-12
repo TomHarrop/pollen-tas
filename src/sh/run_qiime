@@ -6,28 +6,29 @@ QIIME_CONFIG_FP="$(readlink -f data/qiime_config)"
 rm ~/.qiime_config
 cp "${QIIME_CONFIG_FP}" ~/.qiime_config
 
+# manually mung old file NZGL output with python
+src/py/rename_demuxed_reads.py
+
+# check the resulting mapping file
 validate_mapping_file.py \
     -m output/qiime/split_libraries/mapping.txt \
     -o output/qiime/validate_mapping \
     --disable_primer_check
 
-# on original files
-split_libraries.py \
-    -m output/qiime/validate_mapping/test_mapping.tab_corrected.txt \
-    -f previous_data/seq45R1.fasta \
-    --dir_prefix output/qiime/split_libraries \
-    --disable_primers \
-    --min_seq_length 50
-
-# manually mung old file
-test/biopython_test_rename.py
-
+# run qiime
 pick_open_reference_otus.py \
     --parallel \
-    --jobs_to_start 10 \
+    --jobs_to_start 20 \
     -i output/qiime/split_libraries/seqs.fna \
     -r output/fa/rbcl_58024.fa \
     -o output/qiime/open_references
+
+# convert biom table for R
+biom convert \
+    -i output/qiime/open_references/otu_table_mc2_w_tax.biom \
+    -o output/qiime/open_references/otu_table_mc2_w_tax.txt \
+    --to-tsv --header-key taxonomy
+
 
 biom summarize-table \
     -i output/qiime/open_references/otu_table_mc2.biom \
@@ -40,8 +41,8 @@ summarize_taxa_through_plots.py \
 
 core_diversity_analyses.py \
     -i output/qiime/open_references/otu_table_mc2.biom \
-    -o output/qiime/test_diversity \
-    -m output/qiime/validate_mapping/test_mapping.tab_corrected.txt \
+    -o output/qiime/core_diversity_analyses \
+    -m output/qiime/validate_mapping/mapping_corrected.txt \
     -e 1 \
     --nonphylogenetic_diversity
 

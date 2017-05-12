@@ -31,7 +31,14 @@ with open('data/project_files/expected_barcodes.csv', 'r') as f:
         sample_names[row[0]] = row[1]
         expected_barcodes[row[0]] = row[2]
 
-# remove plus symbol
+# read primers
+linker_primers = {}
+with open('data/project_files/linker_primers.csv', 'r') as f:
+    rows = csv.reader(f)
+    for row in rows:
+        linker_primers[row[0]] = row[1]
+
+# remove plus symbol from barcode
 sanitised_barcodes = {}
 for x in expected_barcodes:
     sanitised_barcodes[x] = sanitise_barcode(expected_barcodes[x])
@@ -40,13 +47,6 @@ for x in expected_barcodes:
 sanitised_names = {}
 for x in sample_names:
     sanitised_names[x] = sanitise_name(sample_names[x])
-
-# read primers
-linker_primers = {}
-with open('data/project_files/linker_primers.csv', 'r') as f:
-    rows = csv.reader(f)
-    for row in rows:
-        linker_primers[row[0]] = row[1]
 
 # write sample mapping file
 with open(os.path.join(outdir, "mapping.txt"), 'w') as f:
@@ -66,9 +66,6 @@ desc_regex = r'^.+\s.+\:(?P<BC>\w+\+\w+)$'
 fastq_files = tompytools.find_all(
     ['_merged.fastq.gz'], 'output/trim_merge')
 
-# collect modified fastq
-modified_fastq = []
-
 # open a handle for writing fasta output
 with open(os.path.join(outdir, 'seqs.fna'), 'w') as outfile:
     # loop over fastq
@@ -83,9 +80,9 @@ with open(os.path.join(outdir, 'seqs.fna'), 'w') as outfile:
             fastq = SeqIO.parse(handle, 'fastq-sanger')
             records = [x for x in fastq]
             # modify records
-            i=0
+            i = 0
             for record in records:
-                i+=1
+                i += 1
                 # get the barcode
                 desc = record.description
                 new_bc = sanitise_barcode(re.sub(desc_regex, r'\g<BC>', desc))
@@ -103,8 +100,3 @@ with open(os.path.join(outdir, 'seqs.fna'), 'w') as outfile:
                 # write result
                 if bc_diff == 0:
                     SeqIO.write(record, outfile, 'fasta')
-
-# write output to fasta
-SeqIO.write(modified_fastq,
-            'test/seqs.fna',
-            'fasta')

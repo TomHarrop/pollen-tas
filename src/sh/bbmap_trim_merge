@@ -9,6 +9,7 @@ pair_trim_merge () {
     local _r2_file
     local _cmd1
     local _bn
+    local _bn2
     local _bbmerge_err
     
     _r1_file="${1}"
@@ -26,7 +27,8 @@ pair_trim_merge () {
     fi
 
     # output basename
-    _bn=$(basename "${_r1_file%%_R1_*}")
+    _bn2=$(basename "${_r1_file%%_R1_*}")
+    _bn="${_bn2#D2JR8-}"
     printf "basename:\t%s\n" "${_bn}"
 
     # bbmerge
@@ -37,7 +39,8 @@ pair_trim_merge () {
                "outu=${_outdir}/${_bn}_unmerged_R1.fastq.gz"
                "outu2=${_outdir}/${_bn}_unmerged_R2.fastq.gz"
                ziplevel=9
-               adapter="data/rbcl_primers.fa" )
+               adapter="data/project_files/rbcl_primers.fa"
+               mix=t )
 
     shopt -s extglob
     printf "merge command line: "

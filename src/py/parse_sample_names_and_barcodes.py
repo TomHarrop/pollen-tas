@@ -7,7 +7,7 @@ from Bio.Seq import Seq
 bc_seqs = {}
 rc_bc_seqs = {}
 
-with open('data/bc_name_and_seq.csv', 'r') as f:
+with open('data/project_files/bc_name_and_seq.csv', 'r') as f:
     rows = csv.reader(f)
     next(rows)
     for row in rows:
@@ -20,7 +20,7 @@ for key in bc_seqs:
 sample_names = {}
 first_bc_rc = {}
 second_bc = {}
-with open('data/sample_id_and_bc.csv', 'r') as f:
+with open('data/project_files/sample_id_and_bc.csv', 'r') as f:
     rows = csv.reader(f)
     next(rows)
     for row in rows:
@@ -38,7 +38,7 @@ for key in sample_names:
 # write output
 csvrows = [[x, sample_names[x], expected_barcode_seq[x]]
            for x in expected_barcode_seq]
-with open('data/expected_barcodes.csv', 'w') as csvfile:
+with open('data/project_files/expected_barcodes.csv', 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(["nzgl_id", "sample_name", "expected_barcodes"])
     csvwriter.writerows(csvrows)
