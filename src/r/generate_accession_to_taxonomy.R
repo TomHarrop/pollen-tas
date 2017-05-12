@@ -67,6 +67,7 @@ taxo_spec <- merge(taxo,
                    by = "accession")
 taxo_spec[, species := gsub("[^[:alnum:]]+", ".", species)]
 taxo_spec[, taxonomy := paste(taxonomy, species, sep = "; s_")]
+taxo_spec[, species := NULL]
 
 # write output
 rutils::GenerateMessage("Writing output")
