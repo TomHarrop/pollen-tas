@@ -33,11 +33,11 @@ plot_taxa <- ranked_taxa[1:10, taxonomy]
 pd <- amplicons_per_taxa[taxonomy %in% plot_taxa]
 pd[, taxonomy := factor(taxonomy, levels = rev(plot_taxa))]
 so_tab <- pd[taxonomy == plot_taxa[1]]
-setorder(so_tab, -percent_total_reads)
+setorder(so_tab, -percent_sample_total)
 so <- so_tab[, unique(as.character(sample))]
 pd[, sample := factor(sample, levels = so)]
 
-g <- ggplot(pd, aes(x = sample, y = percent_total_reads, fill = taxonomy)) +
+g <- ggplot(pd, aes(x = sample, y = percent_sample_total, fill = taxonomy)) +
     theme_minimal() + xlab(NULL) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     scale_x_discrete(expand = c(0,0)) +
