@@ -2,32 +2,6 @@
 
 library(data.table)
 
-# get input
-command.args <- commandArgs(trailingOnly = TRUE)
-# command.args <- c("-z", "data/ncbi/nucl_gb.accession2taxid.Rds",
-#                   "-z", "data/ncbi/nodes.dmp.Rds",
-#                   "-z", "data/ncbi/names.dmp.Rds")
-parsed.args <- argparsR::ParseArguments(
-    accepted.switches = list(
-        `other.output` = "-z"),
-    command.args)
-nucl_gb_file <- grep("nucl_gb", parsed.args$other.output, value = TRUE)
-names_file <- grep("names.dmp", parsed.args$other.output, value = TRUE)
-nodes_file <- grep("nodes.dmp", parsed.args$other.output, value = TRUE)
-
-outdir <- dirname(nucl_gb_file)
-
-# download accession to taxid conversion table
-rutils::GenerateMessage("Downloading accession2taxid")
-nucl_gb.accession2taxid.url <-
-    "ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz"
-temp1 <- tempfile(fileext = ".gz")
-download.file(nucl_gb.accession2taxid.url, temp1)
-
-# read in with data.table
-rutils::GenerateMessage("fread-ing accession2taxid")
-nucl_gb.accession2taxid <- fread(paste("zcat", temp1))
-
 # download taxdump (complete NCBI taxonomy)
 rutils::GenerateMessage("Downloading taxdump")
 taxdmp.url <- "ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip"
@@ -78,35 +52,16 @@ merged.dmp.raw[, old_tax_id :=
                    as.numeric(gsub("\t", "", old_tax_id, fixed = TRUE))]
 merged.dmp.raw[, new_tax_id := as.numeric(new_tax_id)]
 
-# fix node names in accession2taxid
-rutils::GenerateMessage("Using merged.dmp to fix taxid in accession2taxid")
-nucl_gb.accession2taxid[, taxid := as.numeric(taxid)]
-accession2taxid <- merge(nucl_gb.accession2taxid,
-                         merged.dmp.raw,
-                         by.x = "taxid",
-                         by.y = "old_tax_id",
-                         all.x = TRUE)
-accession2taxid[, taxid.tmp := new_tax_id]
-accession2taxid[is.na(taxid.tmp), taxid.tmp := taxid]
-accession2taxid[, old_tax_id := taxid]
-accession2taxid[, taxid := taxid.tmp]
-accession2taxid[, taxid.tmp := NULL]
-accession2taxid[taxid == old_tax_id, old_tax_id := NA]
-
-# sort accession2taxid
-rutils::GenerateMessage("Sorting accession2taxid")
-setkey(accession2taxid, accession.version)
-
 # save output
+outdir <- "data/ncbi"
 rutils::GenerateMessage("Writing output")
 rutils::PrintF("outdir: %s\n", outdir)
 if (!dir.exists(outdir)) {
     dir.create(outdir)
 }
 
-saveRDS(accession2taxid, nucl_gb_file)
-saveRDS(nodes.dmp.raw, nodes_file)
-saveRDS(names.dmp.raw, names_file)
+saveRDS(nodes.dmp.raw, paste0(outdir, "/nodes.dmp.Rds"))
+saveRDS(names.dmp.raw, paste0(outdir, "/names.dmp.Rds"))
 
 # log metadata
 rutils::GenerateMessage("Logging metadata")

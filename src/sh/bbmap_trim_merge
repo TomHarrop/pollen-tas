@@ -39,8 +39,7 @@ pair_trim_merge () {
                "outu=${_outdir}/${_bn}_unmerged_R1.fastq.gz"
                "outu2=${_outdir}/${_bn}_unmerged_R2.fastq.gz"
                ziplevel=9
-               adapter="data/project_files/rbcl_primers.fa"
-               mix=t )
+               adapter="data/project_files/rbcl_primers.fa" )
 
     shopt -s extglob
     printf "merge command line: "

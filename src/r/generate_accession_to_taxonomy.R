@@ -49,34 +49,28 @@ setkey(allowed_taxa, name_txt)
 
 # taxonomy from genbank rbcL search results
 rutils::GenerateMessage("Loading GenBank results")
-acc_tax_df <- read.csv("output/taxonomy/genbank_results.txt",
-                       header = FALSE,
-                       sep = ",",
-                       quote = "",
-                       fill = TRUE,
-                       stringsAsFactors = FALSE)
-acc_tax <- data.table(acc_tax_df)
-
-# mung the data a bit
-rutils::GenerateMessage("Tidying")
-setnames(acc_tax, "V1", "accession")
-taxonomy_entries <- grep("^V", names(acc_tax), value = TRUE)
-setnames(acc_tax,
-         taxonomy_entries,
-         paste0("pos", seq(1, length(taxonomy_entries))))
+acc_tax <- fread("output/taxonomy/genbank_results.txt")
 
 # generate a taxonomy line for each accession
 rutils::GenerateMessage("Searching for taxa in allowed_taxa")
-sc <- grep("^pos", names(acc_tax), value = TRUE)
 taxo <- acc_tax[, .(
-    taxonomy = GenerateQiimeTaxonomyLine(unique(unlist(c(.SD))),
-                                         allowed_taxa,
-                                         ranks)),
-    .SDcols = sc, by = accession]
+    taxonomy = GenerateQiimeTaxonomyLine(
+        taxon, allowed_taxa, ranks)),
+    by = accession]
+
+# add species from acc_tax
+acc_spec <- unique(acc_tax[, .(accession, species)])
+taxo_spec <- merge(taxo,
+                   acc_spec,
+                   all.x = TRUE,
+                   all.y = FALSE,
+                   by = "accession")
+taxo_spec[, species := gsub("[^[:alnum:]]+", ".", species)]
+taxo_spec[, taxonomy := paste(taxonomy, species, sep = "; s_")]
 
 # write output
 rutils::GenerateMessage("Writing output")
-fwrite(taxo,
+fwrite(taxo_spec,
        file = "output/taxonomy/taxonomy.txt",
        quote = FALSE,
        sep = "\t",

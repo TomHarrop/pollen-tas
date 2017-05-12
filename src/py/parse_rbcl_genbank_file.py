@@ -17,11 +17,15 @@ for record in gb_records:
 fasta_file = 'output/fa/rbcl_58024.fa'
 SeqIO.write(gb_records, fasta_file, 'fasta')
 
-# write accession to taxonomy file
-lines = [
-    list(tompytools.flatten_list([x.id, x.annotations['taxonomy']]))
-    for x in gb_records]
+# wtf?
+test_blank = [x for x in gb_records if x.id == '']
 
+# write long
+lines = []
+for record in gb_records:
+    for tax in record.annotations['taxonomy']:
+        lines.append([record.annotations['organism'], record.id, tax])
 with open('output/taxonomy/genbank_results.txt', 'w') as f:
     csv_writer = csv.writer(f)
+    csv_writer.writerow(['species', 'accession', 'taxon'])
     csv_writer.writerows(lines)
