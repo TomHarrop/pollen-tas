@@ -34,7 +34,7 @@ parallel_assign_taxonomy_uclust.py \
     -i output/qiime/open_references/rep_set.fna \
     -o output/qiime/open_references/uclust_assigned_taxonomy -T --jobs_to_start 20
 biom add-metadata \
-    -i output/qiime/open_references/otu_table_mc2.biom
+    -i output/qiime/open_references/otu_table_mc2.biom \
     --observation-metadata-fp \
     output/qiime/open_references/uclust_assigned_taxonomy/rep_set_tax_assignments.txt \
     -o output/qiime/open_references/otu_table_mc2_w_tax.biom \
