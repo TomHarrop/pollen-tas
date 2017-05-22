@@ -2,9 +2,18 @@
 
 set -eu
 
+# generate qiime config
 QIIME_CONFIG_FP="$(readlink -f data/qiime_config)"
 rm ~/.qiime_config
 cp "${QIIME_CONFIG_FP}" ~/.qiime_config
+
+# qiime parameters file
+qiime_params="output/qiime/qiime_parameters.txt"
+cat <<- _EOF_ > "${qiime_params}"
+assign_taxonomy:similarity  0.99
+pick_otus:similarity        0.99
+
+_EOF_
 
 # manually mung old file NZGL output with python
 src/py/rename_demuxed_reads.py
@@ -18,7 +27,8 @@ validate_mapping_file.py \
 # run qiime
 pick_open_reference_otus.py \
     --parallel \
-    --jobs_to_start 20 \
+    "--parameter_fp=${qiime_params}" \
+    --jobs_to_start 50 \
     -i output/qiime/split_libraries/seqs.fna \
     -r output/fa/rbcl_58024.fa \
     -o output/qiime/open_references

@@ -8,8 +8,10 @@ pair_trim_merge () {
     local _r1_file
     local _r2_file
     local _cmd1
+    local _cmd2
     local _bn
     local _bn2
+    local _bbduk_err
     local _bbmerge_err
     
     _r1_file="${1}"
@@ -31,25 +33,30 @@ pair_trim_merge () {
     _bn="${_bn2#D2JR8-}"
     printf "basename:\t%s\n" "${_bn}"
 
-    # bbmerge
-    _cmd1=( bin/bbmap/bbmerge.sh 
+    # bbduk
+    _cmd1=( bin/bbmap/bbduk.sh
                "in1=${_r1_file}"
                "in2=${_r2_file}"
+               out=stdout.fq
+               ktrim=l rcomp=t
+               k=20 hdist=2
+               mink=10 hdist2=1
+               ref="data/project_files/rbcl_primers.fa" )
+
+    # bbmerge
+    _cmd2=( bin/bbmap/bbmerge.sh 
+               in=stdin.fq
                "out=${_outdir}/${_bn}_merged.fastq.gz"
                "outu=${_outdir}/${_bn}_unmerged_R1.fastq.gz"
                "outu2=${_outdir}/${_bn}_unmerged_R2.fastq.gz"
                ziplevel=9
                adapter="data/project_files/rbcl_primers.fa" )
 
-    shopt -s extglob
-    printf "merge command line: "
-    printf "%s " "${_cmd1[@]//+([[:blank:]])/ }"
-    printf "\n"
-    shopt -u extglob
-
-    # run bbmerge
-    _bbmerge_err="${_outdir}/${_bn}.log"
-    "${_cmd1[@]}" 2> "${_bbmerge_err}"
+    # run pipe
+    _bbduk_err="${_outdir}/${_bn}_bbduk.log"
+    _bbmerge_err="${_outdir}/${_bn}_bbmerge.log"
+    "${_cmd1[@]}" 2> "${_bbduk_err}" \
+        | "${_cmd2[@]}" 2> "${_bbmerge_err}"
 }
 
 export -f pair_trim_merge

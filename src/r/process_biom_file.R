@@ -19,6 +19,21 @@ amplicons_per_taxa[, percent_sample_total := 100 * amplicons / sum(amplicons),
                    by = sample]
 amplicons_per_taxa[, total_reads_per_sample := sum(amplicons), by = sample]
 
+# try to calculate psedo-size factors: median of count / average count by
+# sample.
+amp_wide <- dcast(amplicons_per_taxa,
+                  taxonomy ~ sample,
+                  value.var = "amplicons")
+count.matrix <- as.matrix(data.frame(amp_wide, row.names = "taxonomy"))
+cm <- count.matrix[rowSums(count.matrix) > 10, ]
+sjmat <- cm / rowMeans(cm)
+sf <- apply(sjmat, 2, function(x)
+    median(x[is.finite(x) & x != 0], na.rm = TRUE))
+# ggplot2::ggplot(data.frame(sample = names(sf), sf = sf),
+#                 aes(x = sample, y = sf)) +
+#     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90)) +
+#     ggplot2::geom_col()
+
 # write output
 fwrite(amplicons_per_taxa, "output/otu_tables/amplicons_per_taxon.csv")
 
