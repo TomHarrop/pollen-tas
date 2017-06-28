@@ -20,6 +20,8 @@ def sanitise_name(x):
 
 # output:
 outdir = "output/qiime/split_libraries"
+if not os.path.isdir(outdir):
+    os.makedirs(outdir)
 
 # parse expected_barcodes and nzgl names from project files
 sample_names = {}

@@ -10,8 +10,8 @@ cp "${QIIME_CONFIG_FP}" ~/.qiime_config
 # qiime parameters file
 qiime_params="output/qiime/qiime_parameters.txt"
 cat <<- _EOF_ > "${qiime_params}"
-assign_taxonomy:similarity  0.99
-pick_otus:similarity        0.99
+assign_taxonomy:similarity  0.98
+pick_otus:similarity        0.98
 
 _EOF_
 

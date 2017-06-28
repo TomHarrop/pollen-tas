@@ -40,7 +40,7 @@ pair_trim_merge () {
                out=stdout.fq
                ktrim=l rcomp=t
                k=20 hdist=2
-               mink=10 hdist2=1
+               mink=10 hdist2=2
                ref="data/project_files/rbcl_primers.fa" )
 
     # bbmerge
